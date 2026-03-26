@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-parchment: #f9f3e3;
+    --color-parchment-dark: #ecdbb0;
+    --color-ink: #1a1410;
+    --color-ink-muted: #6b5744;
+    --color-accent-gold: #8b6914;
+    --color-accent-red: #7a1e1e;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--color-ink);
+    background-color: var(--color-parchment);
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: var(--color-parchment);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Cinzel', Georgia, serif;
+  }
+}
+
+@layer components {
+  /* Paper card */
+  .paper-card {
+    @apply bg-parchment-50 border border-parchment-400 rounded-xl shadow-md;
+  }
+
+  /* Field box — bordered input area like on a real sheet */
+  .field-box {
+    @apply border border-ink/20 bg-parchment-100 rounded-lg px-2 py-1 font-serif text-ink;
+  }
+
+  /* Section header — decorative horizontal rule */
+  .section-header {
+    @apply font-display text-xs uppercase tracking-widest text-ink-muted border-b border-ink/20 pb-1 mb-2;
+  }
+
+  /* Stat circle — ability score bubbles */
+  .stat-circle {
+    @apply flex flex-col items-center justify-center rounded-full border-2 border-ink/30 bg-parchment-100 font-display;
+  }
+
+  /* Checkbox dot */
+  .prof-dot {
+    @apply w-3.5 h-3.5 rounded-full border border-ink/40 bg-parchment-100 flex-shrink-0;
+  }
+  .prof-dot.filled {
+    @apply bg-ink border-ink;
+  }
+  .prof-dot.half {
+    @apply bg-ink/40 border-ink;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .paper-card {
+    box-shadow: none;
+    border-color: #999;
+  }
+}
