@@ -17,7 +17,6 @@ type TabId = 'overview' | 'skills' | 'features' | 'equipment' | 'spells' | 'note
 type DesktopRightTab = 'equipment' | 'features' | 'spells' | 'notes'
 
 const MOBILE_TABS: { id: TabId; label: string }[] = [
-  { id: 'overview', label: 'Overview' },
   { id: 'skills', label: 'Skills' },
   { id: 'features', label: 'Features' },
   { id: 'equipment', label: 'Equipment' },
@@ -36,7 +35,7 @@ export default function CharacterSheetPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { getCharacter } = useCharacterStore()
-  const [activeTab, setActiveTab] = useState<TabId>('overview')
+  const [activeTab, setActiveTab] = useState<TabId>('skills')
   const [desktopRightTab, setDesktopRightTab] = useState<DesktopRightTab>('equipment')
   const [isEditing, setIsEditing] = useState(false)
   const printRef = useRef<HTMLDivElement>(null)
@@ -153,7 +152,6 @@ export default function CharacterSheetPage() {
             ))}
           </div>
           <div>
-            {activeTab === 'overview' && <TabOverview character={character} stats={stats} />}
             {activeTab === 'skills' && <TabSkills character={character} stats={stats} />}
             {activeTab === 'features' && <TabFeatures character={character} />}
             {activeTab === 'equipment' && <TabEquipment character={character} />}

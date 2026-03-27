@@ -18,12 +18,12 @@ const ALIGNMENT_LABELS: Record<Alignment, string> = {
 }
 
 const ABILITY_SHORT: { key: AbilityName; short: string }[] = [
-  { key: 'strength', short: 'Strength' },
-  { key: 'dexterity', short: 'Dexterity' },
-  { key: 'constitution', short: 'Constitution' },
-  { key: 'intelligence', short: 'Intelligence' },
-  { key: 'wisdom', short: 'Wisdom' },
-  { key: 'charisma', short: 'Charisma' },
+  { key: 'strength', short: 'STR' },
+  { key: 'dexterity', short: 'DEX' },
+  { key: 'constitution', short: 'CON' },
+  { key: 'intelligence', short: 'INT' },
+  { key: 'wisdom', short: 'WIS' },
+  { key: 'charisma', short: 'CHA' },
 ]
 
 const CELL = 'border border-parchment-400 rounded-xl bg-parchment-100/40 px-3 py-2'
@@ -73,10 +73,10 @@ export default function SheetHeader({ character, stats, isEditing = false }: Pro
     <>
       <div className={`paper-card p-3 mb-4 transition-colors ${isEditing ? 'ring-2 ring-accent-gold/40' : ''}`}>
 
-        {/* === ROW 1: Identity / Class / HP === */}
-        <div className={`grid gap-2 ${isEditing ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-[1fr_1fr_2fr]'}`}>
+        {/* === ROW 1: Identity + Class / HP === */}
+        <div className={`grid gap-2 ${isEditing ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-[1fr_auto]'}`}>
 
-          {/* Cell A — Identity */}
+          {/* Cell A — Identity + Class (merged) */}
           <div className={CELL}>
             {isEditing ? (
               <>
@@ -91,28 +91,9 @@ export default function SheetHeader({ character, stats, isEditing = false }: Pro
                   type="text"
                   value={character.species ?? ''}
                   onChange={(e) => patch({ species: e.target.value })}
-                  className="field-box w-full font-serif text-sm text-ink-muted"
+                  className="field-box w-full font-serif text-sm text-ink-muted mb-1"
                   placeholder="Species"
                 />
-              </>
-            ) : (
-              <>
-                <div className="font-display text-xl text-ink font-semibold leading-tight">{character.name}</div>
-                <div className="font-serif text-sm text-ink-muted mt-0.5">
-                  {character.species && <span>{character.species}</span>}
-                  {character.background && <span> · {character.background.name}</span>}
-                </div>
-                <div className="font-sans text-xs text-ink-muted mt-0.5">
-                  Level {stats.totalLevel} · Prof {formatModifier(stats.proficiencyBonus)}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Cell B — Class / Alignment / Actions */}
-          <div className={CELL}>
-            {isEditing ? (
-              <>
                 <div className="font-serif text-sm text-ink mb-1">{classLine || 'No class'}</div>
                 <select
                   value={character.alignment}
@@ -125,12 +106,35 @@ export default function SheetHeader({ character, stats, isEditing = false }: Pro
                 </select>
               </>
             ) : (
-              <>
-                <div className="font-serif text-sm text-ink">{classLine || 'No class'}</div>
-                <div className="font-sans text-xs text-ink-muted mt-0.5">
-                  {ALIGNMENT_LABELS[character.alignment] ?? character.alignment}
+              <div className="flex flex-col gap-0">
+                {/* Row 1: Name + Level + Prof */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="font-display text-xl text-ink font-semibold leading-tight">{character.name}</div>
+                  <div className="shrink-0 border border-parchment-400 rounded-xl bg-parchment-100/40 px-3 py-1 text-center">
+                    <div className="font-display text-2xl font-semibold text-ink leading-none">{formatModifier(stats.proficiencyBonus)}</div>
+                    <div className="text-[9px] font-sans text-ink-muted leading-tight mt-0.5">Proficiency Bonus</div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 mt-2 no-print">
+                {/* Row 2: Class + Level */}
+                <div className="flex items-baseline gap-2">
+                  <div className="font-serif text-base text-ink">
+                    {character.classes.length > 0
+                      ? character.classes.map((c) => CLASS_LABELS[c.class] ?? c.class).join(' / ')
+                      : 'No class'}
+                  </div>
+                  {stats.totalLevel > 0 && (
+                    <div className="font-sans text-xs text-ink-muted border border-parchment-400 rounded px-1.5 py-0.5 leading-none">
+                      Lvl {stats.totalLevel}
+                    </div>
+                  )}
+                </div>
+                {/* Row 3: Species · Background · Alignment */}
+                <div className="font-sans text-sm text-ink-muted">
+                  {[character.species, character.background?.name, ALIGNMENT_LABELS[character.alignment] ?? character.alignment]
+                    .filter(Boolean).join(' · ')}
+                </div>
+                {/* Row 4: buttons */}
+                <div className="flex items-center gap-2 pt-1 no-print">
                   <button
                     onClick={toggleInspiration}
                     className={`flex items-center gap-1 px-2 py-1 rounded-sm border text-xs font-sans transition-colors ${
@@ -152,7 +156,7 @@ export default function SheetHeader({ character, stats, isEditing = false }: Pro
                     </button>
                   )}
                 </div>
-              </>
+              </div>
             )}
           </div>
 
@@ -298,53 +302,20 @@ export default function SheetHeader({ character, stats, isEditing = false }: Pro
           )}
         </div>
 
-        {/* === ROW 2: Ability Scores + Hit Dice === */}
+        {/* === ROW 2: Ability Scores === */}
         {!isEditing && stats.totalLevel > 0 && (
-          <div className="grid grid-cols-3 md:grid-cols-7 gap-2 mt-2">
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mt-2">
             {ABILITY_SHORT.map(({ key, short }) => {
               const score = character.abilityScores[key]
               const mod = stats.abilityModifiers[key]
               return (
                 <div key={key} className={`${CELL} text-center flex flex-col items-center justify-center gap-0.5`}>
-                  <div className="text-[9px] font-sans font-semibold text-ink-muted tracking-widest uppercase">{short}</div>
+                  <div className="text-[9px] font-sans font-semibold text-ink-muted tracking-wide uppercase">{short}</div>
                   <div className="font-display text-xl text-ink leading-none font-semibold">{formatModifier(mod)}</div>
                   <div className="text-xs font-sans text-ink-muted">{score}</div>
                 </div>
               )
             })}
-
-            {/* Hit Dice cell */}
-            {character.hitDice.length > 0 && (
-              <div className={`${CELL} text-center col-span-3 md:col-span-1`}>
-                <div className="text-[10px] font-sans font-semibold text-ink-muted tracking-widest uppercase mb-0.5">HD</div>
-                {character.hitDice.map((hd, i) => (
-                  <div key={i}>
-                    <div className="font-display text-xl font-semibold text-ink leading-none">
-                      {hd.remaining}<span className="text-ink-muted text-sm">/{hd.total}</span>
-                    </div>
-                    <div className="text-xs font-sans text-ink-muted">d{hd.dieSize}</div>
-                    <div className="flex gap-1 justify-center mt-0.5">
-                      <button
-                        onClick={() => {
-                          const updated = [...character.hitDice]
-                          updated[i] = { ...hd, remaining: Math.max(0, hd.remaining - 1) }
-                          updateCharacter(character.id, { hitDice: updated })
-                        }}
-                        className="w-5 h-5 text-xs paper-card hover:bg-parchment-200 transition-colors leading-none"
-                      >-</button>
-                      <button
-                        onClick={() => {
-                          const updated = [...character.hitDice]
-                          updated[i] = { ...hd, remaining: Math.min(hd.total, hd.remaining + 1) }
-                          updateCharacter(character.id, { hitDice: updated })
-                        }}
-                        className="w-5 h-5 text-xs paper-card hover:bg-parchment-200 transition-colors leading-none"
-                      >+</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         )}
 
@@ -383,15 +354,15 @@ export default function SheetHeader({ character, stats, isEditing = false }: Pro
           <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mt-2">
             {[
               { label: 'AC', value: character.armorClass },
-              { label: 'Initiative', value: formatModifier(character.initiative || stats.abilityModifiers.dexterity) },
+              { label: 'Init', value: formatModifier(character.initiative || stats.abilityModifiers.dexterity) },
               { label: 'Speed', value: `${character.speed} ft` },
-              { label: 'Passive Perc', value: stats.passivePerception },
-              { label: 'Passive Insight', value: stats.passiveInsight },
-              { label: 'Passive Inv', value: stats.passiveInvestigation },
+              { label: 'Pass. Perc', value: stats.passivePerception },
+              { label: 'Pass. Ins', value: stats.passiveInsight },
+              { label: 'Pass. Inv', value: stats.passiveInvestigation },
             ].map(({ label, value }) => (
               <div key={label} className={`${CELL} text-center`}>
                 <div className="font-display text-xl font-semibold text-ink leading-none">{value}</div>
-                <div className="text-[10px] font-sans font-semibold text-ink-muted tracking-widest uppercase mt-1">{label}</div>
+                <div className="text-[9px] font-sans font-semibold text-ink-muted tracking-wide uppercase mt-1 leading-tight">{label}</div>
               </div>
             ))}
           </div>

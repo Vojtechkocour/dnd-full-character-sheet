@@ -92,7 +92,7 @@ function buildItems(refs: StartingItemRef[]): EquipmentItem[] {
     .map(ref => {
       const weight = ref.type === 'armor' ? getArmorDef(ref.name)?.weight : getGearDef(ref.name)?.weight
       const armorDef = ref.type === 'armor' ? getArmorDef(ref.name) : undefined
-      return { id: uid(), name: ref.name, quantity: ref.quantity ?? 1, weight, notes: armorDef ? `Armor — AC: ${armorDef.ac}` : undefined }
+      return { id: uid(), name: ref.name, quantity: ref.quantity ?? 1, weight, notes: armorDef ? `AC: ${armorDef.ac}` : undefined }
     })
 }
 

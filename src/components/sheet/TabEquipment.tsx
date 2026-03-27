@@ -7,18 +7,25 @@ import { TOOL_DESCRIPTIONS } from '@/data/tools'
 
 const MASTERY_OPTIONS: WeaponMastery[] = ['cleave', 'graze', 'nick', 'push', 'sap', 'slow', 'topple', 'vex']
 
+const DAMAGE_TYPE_SHORT: Record<string, string> = {
+  slashing: 'Slsh', piercing: 'Prc', bludgeoning: 'Bldg',
+  fire: 'Fire', cold: 'Cold', lightning: 'Ltng', thunder: 'Thdr',
+  poison: 'Psn', acid: 'Acid', necrotic: 'Necr', radiant: 'Rad',
+  psychic: 'Psy', force: 'Frc', healing: 'Heal',
+}
+
 // Shared column widths — header and rows use the same classes
 const COL = {
-  name:   'flex-1 min-w-0',
-  attack: 'w-20 text-center shrink-0',
-  damage: 'w-36 shrink-0',
-  mastery:'w-24 shrink-0',
+  name:   'flex-1 min-w-0 text-left',
+  attack: 'w-12 sm:w-20 text-left shrink-0',
+  damage: 'w-24 sm:w-36 text-left shrink-0',
+  mastery:'w-16 sm:w-24 shrink-0 text-right',
 }
 
 const ITEM_COL = {
-  name:     'flex-1 min-w-0',
-  notes:    'w-48 shrink-0',
-  quantity: 'w-20 text-center shrink-0',
+  name:     'flex-1 min-w-0 text-left',
+  notes:    'w-28 sm:w-48 shrink-0 text-center',
+  quantity: 'w-12 sm:w-20 text-right shrink-0',
 }
 
 interface Props {
@@ -166,12 +173,12 @@ export default function TabEquipment({ character }: Props) {
         {character.weapons.length > 0 && (
           <div className="mb-3">
             {/* Header row */}
-            <div className="flex items-center gap-4 px-3 py-1.5 bg-parchment-200/60 rounded-sm mb-1">
-              <span className={`${COL.name} text-xs font-sans font-semibold text-ink-muted uppercase tracking-widest`}>Name</span>
-              <span className={`${COL.attack} text-xs font-sans font-semibold text-ink-muted uppercase tracking-widest`}>Attack</span>
-              <span className={`${COL.damage} text-xs font-sans font-semibold text-ink-muted uppercase tracking-widest`}>Damage</span>
-              <span className={`${COL.mastery} text-xs font-sans font-semibold text-ink-muted uppercase tracking-widest`}>Mastery</span>
-              <span className="w-14 shrink-0" />
+            <div className="flex items-center gap-1 sm:gap-4 px-3 py-1.5 bg-parchment-200/60 rounded-sm mb-1">
+              <span className={`${COL.name} text-[9px] sm:text-xs font-sans font-semibold text-ink-muted uppercase tracking-wide sm:tracking-widest`}>Name</span>
+              <span className={`${COL.attack} text-[9px] sm:text-xs font-sans font-semibold text-ink-muted uppercase tracking-wide sm:tracking-widest`}>Atk</span>
+              <span className={`${COL.damage} text-[9px] sm:text-xs font-sans font-semibold text-ink-muted uppercase tracking-wide sm:tracking-widest`}>Damage</span>
+              <span className={`${COL.mastery} text-[9px] sm:text-xs font-sans font-semibold text-ink-muted uppercase tracking-wide sm:tracking-widest`}>Mastery</span>
+              <span className="hidden sm:block w-14 shrink-0" />
             </div>
 
             {/* Rows */}
@@ -223,17 +230,17 @@ export default function TabEquipment({ character }: Props) {
                 ) : (
                   <div
                     key={w.id}
-                    className="flex items-center gap-4 px-3 py-2.5 hover:bg-parchment-100 cursor-pointer group transition-colors"
+                    className="flex items-center gap-1 sm:gap-4 px-3 py-2.5 hover:bg-parchment-100 cursor-pointer group transition-colors"
                     onClick={() => startEditWeapon(w)}
                   >
-                    <span className={`${COL.name} font-serif font-semibold text-ink truncate`}>{w.name}</span>
-                    <span className={`${COL.attack} font-display text-base text-ink`}>{formatModifier(w.attackBonus)}</span>
-                    <span className={`${COL.damage} font-display text-base text-ink`}>
+                    <span className={`${COL.name} font-serif font-semibold text-ink truncate text-sm sm:text-base`}>{w.name}</span>
+                    <span className={`${COL.attack} font-display text-sm sm:text-base text-ink`}>{formatModifier(w.attackBonus)}</span>
+                    <span className={`${COL.damage} font-display text-sm sm:text-base text-ink`}>
                       {w.damageDice}{w.damageBonus !== 0 && formatModifier(w.damageBonus)}
-                      {w.damageType && <span className="font-sans text-xs text-ink-muted ml-1.5">{w.damageType}</span>}
+                      {w.damageType && <span className="font-sans text-[10px] sm:text-xs text-ink-muted ml-1">{DAMAGE_TYPE_SHORT[w.damageType.toLowerCase()] ?? w.damageType}</span>}
                     </span>
-                    <span className={`${COL.mastery} font-sans text-sm text-ink capitalize`}>{w.mastery ?? '—'}</span>
-                    <span className="w-14 shrink-0 text-xs text-ink-muted text-right opacity-0 group-hover:opacity-50 transition-opacity">✏ edit</span>
+                    <span className={`${COL.mastery} font-sans text-xs sm:text-sm text-ink capitalize`}>{w.mastery ?? '—'}</span>
+                    <span className="hidden sm:block w-14 shrink-0 text-xs text-ink-muted text-right opacity-0 group-hover:opacity-50 transition-opacity">✏ edit</span>
                   </div>
                 )
               )}
@@ -288,11 +295,11 @@ export default function TabEquipment({ character }: Props) {
         {character.equipment.length > 0 && (
           <div className="mb-3">
             {/* Header row */}
-            <div className="flex items-center gap-4 px-3 py-1.5 bg-parchment-200/60 rounded-sm mb-1">
-              <span className={`${ITEM_COL.name} text-xs font-sans font-semibold text-ink-muted uppercase tracking-widest`}>Name</span>
-              <span className={`${ITEM_COL.notes} text-xs font-sans font-semibold text-ink-muted uppercase tracking-widest`}>Notes</span>
-              <span className={`${ITEM_COL.quantity} text-xs font-sans font-semibold text-ink-muted uppercase tracking-widest`}>Qty</span>
-              <span className="w-14 shrink-0" />
+            <div className="flex items-center gap-1 sm:gap-4 px-3 py-1.5 bg-parchment-200/60 rounded-sm mb-1">
+              <span className={`${ITEM_COL.name} text-[9px] sm:text-xs font-sans font-semibold text-ink-muted uppercase tracking-wide sm:tracking-widest`}>Name</span>
+              <span className={`${ITEM_COL.notes} text-[9px] sm:text-xs font-sans font-semibold text-ink-muted uppercase tracking-wide sm:tracking-widest`}>Notes</span>
+              <span className={`${ITEM_COL.quantity} text-[9px] sm:text-xs font-sans font-semibold text-ink-muted uppercase tracking-wide sm:tracking-widest`}>Qty</span>
+              <span className="hidden sm:block w-14 shrink-0" />
             </div>
 
             {/* Rows */}
@@ -323,13 +330,13 @@ export default function TabEquipment({ character }: Props) {
                 ) : (
                   <div
                     key={item.id}
-                    className="flex items-center gap-4 px-3 py-2.5 hover:bg-parchment-100 cursor-pointer group transition-colors"
+                    className="flex items-center gap-1 sm:gap-4 px-3 py-2.5 hover:bg-parchment-100 cursor-pointer group transition-colors"
                     onClick={() => startEditItem(item)}
                   >
-                    <span className={`${ITEM_COL.name} font-serif text-ink truncate`}>{item.name}</span>
-                    <span className={`${ITEM_COL.notes} text-sm text-ink-muted font-sans truncate`}>{item.notes ?? '—'}</span>
-                    <span className={`${ITEM_COL.quantity} font-display text-base text-ink`}>×{item.quantity}</span>
-                    <span className="w-14 shrink-0 text-xs text-ink-muted text-right opacity-0 group-hover:opacity-50 transition-opacity">✏ edit</span>
+                    <span className={`${ITEM_COL.name} font-serif text-ink truncate text-sm sm:text-base`}>{item.name}</span>
+                    <span className={`${ITEM_COL.notes} text-xs sm:text-sm text-ink-muted font-sans`}>{item.notes ?? '—'}</span>
+                    <span className={`${ITEM_COL.quantity} font-display text-sm sm:text-base text-ink`}>×{item.quantity}</span>
+                    <span className="hidden sm:block w-14 shrink-0 text-xs text-ink-muted text-right opacity-0 group-hover:opacity-50 transition-opacity">✏ edit</span>
                   </div>
                 )
               )}
