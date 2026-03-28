@@ -196,6 +196,21 @@ export interface ClassEntry {
   hitDie: DieSize
 }
 
+// ─── Origin Spell Grants ──────────────────────────────────────────────────────
+
+export interface SpellGrantDef {
+  count: number        // how many spells to choose
+  spellClass: string   // 'cleric' | 'druid' | 'wizard'
+  maxLevel: number     // 0 = cantrips only, 1 = 1st-level only
+  label: string        // display text
+}
+
+export interface FixedSpellGrant {
+  spellName: string           // matches Spell.name in spells.json
+  requiredLevel: number       // min character total level (1 = always active)
+  usesPerLongRest: number | null  // null = at-will (cantrip), 1 = 1/long rest
+}
+
 // ─── Spellcasting ─────────────────────────────────────────────────────────────
 
 export interface SpellcastingInfo {
@@ -258,6 +273,13 @@ export interface Character {
 
   // Spellcasting (optional — only for casters)
   spellcasting?: SpellcastingInfo
+
+  // Feat IDs taken via ASI-level feat choices (level 4, 8, 12, 16, 19)
+  takenFeatIds: string[]
+
+  // Origin spell choices (from background feats & species traits)
+  originSpellChoices: string[]
+  originSpellUses: Record<string, number>  // spellId → uses remaining (for leveled origin spells, 1/long rest)
 
   // Personality
   personalityTraits: string

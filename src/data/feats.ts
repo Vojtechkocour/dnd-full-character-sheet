@@ -1,4 +1,4 @@
-import type { SkillName } from '@/types'
+import type { SkillName, SpellGrantDef } from '@/types'
 
 // ─── Artisan Tools ────────────────────────────────────────────────────────────
 
@@ -57,6 +57,7 @@ export interface OriginFeatDef {
   /** Additional note shown when feat needs complex choice (e.g. spells) */
   complexNote?: string
   choice?: FeatChoiceDef
+  spellGrants?: SpellGrantDef[]
 }
 
 // ─── Origin Feats (2024 PHB) ──────────────────────────────────────────────────
@@ -92,19 +93,28 @@ export const ORIGIN_FEATS: OriginFeatDef[] = [
     id: 'magic_initiate_cleric',
     name: 'Magic Initiate (Cleric)',
     description: 'You learn 2 cantrips and 1 1st-level spell from the Cleric list. You can cast this spell once per Long Rest (without a slot). Spellcasting ability: Wisdom.',
-    complexNote: 'Add the cantrips and spell to the Features tab after finishing creation.',
+    spellGrants: [
+      { count: 2, spellClass: 'cleric', maxLevel: 0, label: 'Choose 2 Cleric cantrips' },
+      { count: 1, spellClass: 'cleric', maxLevel: 1, label: 'Choose 1 Cleric 1st-level spell' },
+    ],
   },
   {
     id: 'magic_initiate_druid',
     name: 'Magic Initiate (Druid)',
     description: 'You learn 2 cantrips and 1 1st-level spell from the Druid list. You can cast this spell once per Long Rest (without a slot). Spellcasting ability: Wisdom.',
-    complexNote: 'Add the cantrips and spell to the Features tab after finishing creation.',
+    spellGrants: [
+      { count: 2, spellClass: 'druid', maxLevel: 0, label: 'Choose 2 Druid cantrips' },
+      { count: 1, spellClass: 'druid', maxLevel: 1, label: 'Choose 1 Druid 1st-level spell' },
+    ],
   },
   {
     id: 'magic_initiate_wizard',
     name: 'Magic Initiate (Wizard)',
     description: 'You learn 2 cantrips and 1 1st-level spell from the Wizard list. You can cast this spell once per Long Rest (without a slot). Spellcasting ability: Intelligence.',
-    complexNote: 'Add the cantrips and spell to the Features tab after finishing creation.',
+    spellGrants: [
+      { count: 2, spellClass: 'wizard', maxLevel: 0, label: 'Choose 2 Wizard cantrips' },
+      { count: 1, spellClass: 'wizard', maxLevel: 1, label: 'Choose 1 Wizard 1st-level spell' },
+    ],
   },
   {
     id: 'performer',

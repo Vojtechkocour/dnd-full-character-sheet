@@ -90,6 +90,11 @@ export function createNewCharacter(name = 'Unnamed Hero'): Character {
 
     features: [],
 
+    takenFeatIds: [],
+
+    originSpellChoices: [],
+    originSpellUses: {},
+
     personalityTraits: '',
     ideals: '',
     bonds: '',

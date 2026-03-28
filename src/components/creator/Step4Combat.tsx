@@ -19,6 +19,7 @@ export default function Step4Combat({ character, onChange }: Props) {
   const hasDwarvenToughness = character.features.some(f => f.name === 'Dwarven Toughness')
   const bgData = BACKGROUNDS_DATA.find(b => b.name === character.background?.name)
   const hasToughFeat = bgData?.featId === 'tough' || character.originFeatChoice === 'tough'
+    || (character.takenFeatIds ?? []).includes('tough')
 
   const hpBonusPerLevel = (hasDwarvenToughness ? 1 : 0) + (hasToughFeat ? 2 : 0)
   const hpBonusSources: string[] = [

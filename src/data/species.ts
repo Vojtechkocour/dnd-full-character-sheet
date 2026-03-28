@@ -1,4 +1,4 @@
-import type { SkillName } from '@/types'
+import type { SkillName, SpellGrantDef, FixedSpellGrant } from '@/types'
 
 export interface SpeciesTrait {
   name: string
@@ -12,6 +12,8 @@ export interface SubspeciesOption {
   speedOverride?: number
   darkvisionOverride?: number
   bonusSkill?: SkillName
+  spellGrants?: SpellGrantDef[]
+  fixedSpellGrants?: FixedSpellGrant[]
 }
 
 export interface SpeciesDataDef {
@@ -22,6 +24,7 @@ export interface SpeciesDataDef {
   darkvision?: number
   description: string
   traits: SpeciesTrait[]
+  fixedSpellGrants?: FixedSpellGrant[]
   subspecies?: {
     label: string   // "Lineage", "Draconic Ancestry", "Giant Ancestry", "Legacy"
     options: SubspeciesOption[]
@@ -37,6 +40,9 @@ export const SPECIES_DATA: SpeciesDataDef[] = [
     size: 'Medium',
     darkvision: 60,
     description: 'Mortals who carry a spark of the Upper Planes within their souls.',
+    fixedSpellGrants: [
+      { spellName: 'Light', requiredLevel: 1, usesPerLongRest: null },
+    ],
     traits: [
       {
         name: 'Celestial Resistance',
@@ -164,6 +170,11 @@ export const SPECIES_DATA: SpeciesDataDef[] = [
           traits: [
             { name: 'Drow Magic', description: 'You know the Dancing Lights cantrip (CHA). At character level 3: Faerie Fire 1/long rest (CHA). At level 5: Darkness 1/long rest (CHA).' },
           ],
+          fixedSpellGrants: [
+            { spellName: 'Dancing Lights', requiredLevel: 1, usesPerLongRest: null },
+            { spellName: 'Faerie Fire',    requiredLevel: 3, usesPerLongRest: 1 },
+            { spellName: 'Darkness',       requiredLevel: 5, usesPerLongRest: 1 },
+          ],
         },
         {
           id: 'high_elf',
@@ -171,6 +182,13 @@ export const SPECIES_DATA: SpeciesDataDef[] = [
           traits: [
             { name: 'High Elf Cantrip', description: 'You know one cantrip of your choice from the Wizard spell list. Intelligence is your spellcasting ability for it.' },
             { name: 'High Elf Magic', description: 'At character level 3: Detect Magic 1/long rest (INT). At level 5: Misty Step 1/long rest (INT).' },
+          ],
+          spellGrants: [
+            { count: 1, spellClass: 'wizard', maxLevel: 0, label: 'Choose 1 Wizard cantrip' },
+          ],
+          fixedSpellGrants: [
+            { spellName: 'Detect Magic', requiredLevel: 3, usesPerLongRest: 1 },
+            { spellName: 'Misty Step',   requiredLevel: 5, usesPerLongRest: 1 },
           ],
         },
         {
@@ -180,6 +198,11 @@ export const SPECIES_DATA: SpeciesDataDef[] = [
           traits: [
             { name: 'Fleet of Foot', description: 'Your Speed is 35 feet.' },
             { name: 'Wood Elf Magic', description: 'You know the Druidcraft cantrip (WIS). At character level 3: Longstrider 1/long rest (WIS). At level 5: Pass Without Trace 1/long rest (WIS).' },
+          ],
+          fixedSpellGrants: [
+            { spellName: 'Druidcraft',        requiredLevel: 1, usesPerLongRest: null },
+            { spellName: 'Longstrider',       requiredLevel: 3, usesPerLongRest: 1 },
+            { spellName: 'Pass without Trace', requiredLevel: 5, usesPerLongRest: 1 },
           ],
         },
       ],
@@ -214,6 +237,9 @@ export const SPECIES_DATA: SpeciesDataDef[] = [
             { name: 'Minor Illusion', description: 'You know the Minor Illusion cantrip. Intelligence is your spellcasting ability for it.' },
             { name: 'Speak with Animals', description: 'You can cast Speak with Animals a number of times equal to your Proficiency Bonus per Long Rest, requiring no spell slots. Intelligence is your spellcasting ability.' },
           ],
+          fixedSpellGrants: [
+            { spellName: 'Minor Illusion', requiredLevel: 1, usesPerLongRest: null },
+          ],
         },
         {
           id: 'rock',
@@ -221,6 +247,9 @@ export const SPECIES_DATA: SpeciesDataDef[] = [
           traits: [
             { name: 'Prestidigitation', description: 'You know the Prestidigitation cantrip. Intelligence is your spellcasting ability for it.' },
             { name: 'Tinker', description: 'You have proficiency with Tinker\'s Tools. Using those tools, you can spend 1 hour and 10 GP worth of materials to construct a Tiny clockwork device (AC 5, 1 HP). You can have up to three such devices active at a time.' },
+          ],
+          fixedSpellGrants: [
+            { spellName: 'Prestidigitation', requiredLevel: 1, usesPerLongRest: null },
           ],
         },
       ],
@@ -386,6 +415,11 @@ export const SPECIES_DATA: SpeciesDataDef[] = [
             { name: 'Abyssal Magic', description: 'You know the Poison Spray cantrip (CHA). At character level 3: Ray of Sickness 1/long rest (CHA). At level 5: Hold Person 1/long rest (CHA).' },
             { name: 'Abyssal Resistance', description: 'You also have resistance to Poison damage.' },
           ],
+          fixedSpellGrants: [
+            { spellName: 'Poison Spray',   requiredLevel: 1, usesPerLongRest: null },
+            { spellName: 'Ray of Sickness', requiredLevel: 3, usesPerLongRest: 1 },
+            { spellName: 'Hold Person',    requiredLevel: 5, usesPerLongRest: 1 },
+          ],
         },
         {
           id: 'chthonic',
@@ -394,12 +428,22 @@ export const SPECIES_DATA: SpeciesDataDef[] = [
             { name: 'Chthonic Magic', description: 'You know the Chill Touch cantrip (CHA). At character level 3: False Life 1/long rest (CHA). At level 5: Ray of Enfeeblement 1/long rest (CHA).' },
             { name: 'Chthonic Resistance', description: 'You also have resistance to Necrotic damage.' },
           ],
+          fixedSpellGrants: [
+            { spellName: 'Chill Touch',         requiredLevel: 1, usesPerLongRest: null },
+            { spellName: 'False Life',           requiredLevel: 3, usesPerLongRest: 1 },
+            { spellName: 'Ray of Enfeeblement', requiredLevel: 5, usesPerLongRest: 1 },
+          ],
         },
         {
           id: 'infernal',
           name: 'Infernal',
           traits: [
             { name: 'Infernal Magic', description: 'You know the Fire Bolt cantrip (CHA). At character level 3: Hellish Rebuke 1/long rest (CHA). At level 5: Darkness 1/long rest (CHA).' },
+          ],
+          fixedSpellGrants: [
+            { spellName: 'Fire Bolt',      requiredLevel: 1, usesPerLongRest: null },
+            { spellName: 'Hellish Rebuke', requiredLevel: 3, usesPerLongRest: 1 },
+            { spellName: 'Darkness',       requiredLevel: 5, usesPerLongRest: 1 },
           ],
         },
       ],

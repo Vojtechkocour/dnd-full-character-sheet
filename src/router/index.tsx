@@ -4,6 +4,7 @@ import CharacterCreatorPage from '@/pages/CharacterCreatorPage'
 import CharacterSheetPage from '@/pages/CharacterSheetPage'
 import SpellLibrary from '@/pages/SpellLibrary'
 import SpellDetail from '@/pages/SpellDetail'
+import OriginSpellLibrary from '@/pages/OriginSpellLibrary'
 
 export const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ export const router = createBrowserRouter([
   {
     path: '/library/:characterId',
     element: <SpellLibrary />,
+  },
+  {
+    path: '/origin-spells/:characterId',
+    element: <OriginSpellLibrary />,
   },
   {
     path: '/spells/:id',
