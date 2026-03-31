@@ -5,7 +5,7 @@ import type { Character, AbilityName, SkillName } from '@/types'
 import { getClassData, getLevelFeatures, getProficiencyBonusAtLevel } from '@/data/classes'
 import { getAbilityModifier, calculateStats, formatModifier } from '@/utils/calculations'
 import type { ClassFeatureEntry } from '@/data/classes'
-import { ORIGIN_FEATS, ALL_SKILLS } from '@/data/feats'
+import { GENERAL_FEATS, EPIC_BOON_FEATS, ALL_SKILLS } from '@/data/feats'
 import type { OriginFeatDef } from '@/data/feats'
 import { BACKGROUNDS_DATA } from '@/data/backgrounds'
 import { applyFeatToCharacter } from '@/utils/applyFeat'
@@ -55,6 +55,7 @@ export default function LevelUpModal({ character, onClose }: Props) {
 
   const newFeatures = getLevelFeatures(primaryClass.class, newLevel)
   const hasASI = newFeatures.some((f) => f.type === 'asi' || f.type === 'epicBoon')
+  const isEpicBoonLevel = newFeatures.some((f) => f.type === 'epicBoon')
   const hasSubclass = newFeatures.some((f) => f.type === 'subclass')
 
   const oldProfBonus = getProficiencyBonusAtLevel(currentLevel)
@@ -66,7 +67,8 @@ export default function LevelUpModal({ character, onClose }: Props) {
   const alreadyTaken = new Set(
     [bgFeatId, character.originFeatChoice, ...(character.takenFeatIds ?? [])].filter(Boolean)
   )
-  const availableFeats = ORIGIN_FEATS.filter(f => !alreadyTaken.has(f.id))
+  const featPool = isEpicBoonLevel ? EPIC_BOON_FEATS : GENERAL_FEATS
+  const availableFeats = featPool.filter(f => f.repeatable || !alreadyTaken.has(f.id))
 
   // ── Tough bonus (if already taken) ────────────────────────────────────────
   const hasToughFeat = bgFeatId === 'tough' || character.originFeatChoice === 'tough'
@@ -90,8 +92,9 @@ export default function LevelUpModal({ character, onClose }: Props) {
   const [featSkillChoices, setFeatSkillChoices] = useState<SkillName[]>([])
   const [featToolChoices, setFeatToolChoices] = useState<string[]>([])
   const [featInstrumentChoice, setFeatInstrumentChoice] = useState<string>('')
+  const [featAbilityChoice, setFeatAbilityChoice] = useState<string>('')
 
-  const selectedFeat = ORIGIN_FEATS.find(f => f.id === selectedFeatId) ?? null
+  const selectedFeat = featPool.find(f => f.id === selectedFeatId) ?? null
 
   const featChoiceComplete = !selectedFeat
     ? false
@@ -101,7 +104,9 @@ export default function LevelUpModal({ character, onClose }: Props) {
         ? featSkillChoices.length >= selectedFeat.choice.count
         : selectedFeat.choice.type === 'tools'
           ? featToolChoices.length >= selectedFeat.choice.count
-          : featInstrumentChoice !== ''
+          : selectedFeat.choice.type === 'abilityScore' || selectedFeat.choice.type === 'element'
+            ? featAbilityChoice !== ''
+            : featInstrumentChoice !== ''
 
   const confirmDisabled = hasASI && asiMode === 'feat' && !featChoiceComplete
 
@@ -110,6 +115,7 @@ export default function LevelUpModal({ character, onClose }: Props) {
     setFeatSkillChoices([])
     setFeatToolChoices([])
     setFeatInstrumentChoice('')
+    setFeatAbilityChoice('')
   }
 
   function toggleSkill(skill: SkillName) {
@@ -173,7 +179,12 @@ export default function LevelUpModal({ character, onClose }: Props) {
         featPatch = applyFeatToCharacter(
           character,
           selectedFeat,
-          { skillChoices: featSkillChoices, toolChoices: featToolChoices, instrumentChoice: featInstrumentChoice },
+          {
+            skillChoices: featSkillChoices,
+            toolChoices: featToolChoices,
+            instrumentChoice: featInstrumentChoice,
+            abilityChoice: featAbilityChoice || undefined,
+          },
           newLevel_,
         )
       }
@@ -324,9 +335,12 @@ export default function LevelUpModal({ character, onClose }: Props) {
               featSkillChoices={featSkillChoices}
               featToolChoices={featToolChoices}
               featInstrumentChoice={featInstrumentChoice}
+              featAbilityChoice={featAbilityChoice}
               onToggleSkill={toggleSkill}
               onToggleTool={toggleTool}
               onSelectInstrument={setFeatInstrumentChoice}
+              onSelectAbility={setFeatAbilityChoice}
+              isEpicBoon={isEpicBoonLevel}
             />
           )}
         </div>
@@ -454,9 +468,12 @@ function FeatPickerPanel({
   featSkillChoices,
   featToolChoices,
   featInstrumentChoice,
+  featAbilityChoice,
   onToggleSkill,
   onToggleTool,
   onSelectInstrument,
+  onSelectAbility,
+  isEpicBoon,
 }: {
   availableFeats: OriginFeatDef[]
   selectedFeat: OriginFeatDef | null
@@ -465,16 +482,19 @@ function FeatPickerPanel({
   featSkillChoices: SkillName[]
   featToolChoices: string[]
   featInstrumentChoice: string
+  featAbilityChoice: string
   onToggleSkill: (skill: SkillName) => void
   onToggleTool: (tool: string) => void
   onSelectInstrument: (instrument: string) => void
+  onSelectAbility: (val: string) => void
+  isEpicBoon: boolean
 }) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   if (availableFeats.length === 0) {
     return (
       <p className="text-sm font-serif text-ink-muted italic text-center py-3">
-        Všechny featy jsou již vzaty.
+        {isEpicBoon ? 'Všechny Epic Boon featy jsou již vzaty.' : 'Všechny General featy jsou již vzaty.'}
       </p>
     )
   }
@@ -526,12 +546,41 @@ function FeatPickerPanel({
         <div className="paper-card p-3 bg-parchment-100/60">
           <div className="text-xs font-sans text-ink-muted mb-2 font-semibold uppercase tracking-wide">
             {selectedFeat.choice.label}
-            {selectedFeat.choice.count > 1 && (
+            {selectedFeat.choice.count > 1 && selectedFeat.choice.type !== 'abilityScore' && selectedFeat.choice.type !== 'element' && (
               <span className="ml-1 normal-case font-normal">
                 ({selectedFeat.choice.type === 'skills' ? featSkillChoices.length : featToolChoices.length}/{selectedFeat.choice.count} vybráno)
               </span>
             )}
           </div>
+
+          {selectedFeat.choice.type === 'abilityScore' && selectedFeat.choice.options && (
+            <select
+              value={featAbilityChoice}
+              onChange={(e) => onSelectAbility(e.target.value)}
+              className="field-box w-full"
+            >
+              <option value="">— Vyber ability score —</option>
+              {(selectedFeat.choice.options as readonly string[]).map(ability => (
+                <option key={ability} value={ability}>
+                  {ABILITY_LABELS[ability as keyof typeof ABILITY_LABELS] ?? ability}
+                  {` (${character.abilityScores[ability as keyof typeof character.abilityScores]} → ${Math.min(20, character.abilityScores[ability as keyof typeof character.abilityScores] + 1)})`}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {selectedFeat.choice.type === 'element' && selectedFeat.choice.options && (
+            <select
+              value={featAbilityChoice}
+              onChange={(e) => onSelectAbility(e.target.value)}
+              className="field-box w-full"
+            >
+              <option value="">— Vyber damage type —</option>
+              {(selectedFeat.choice.options as readonly string[]).map(el => (
+                <option key={el} value={el}>{el}</option>
+              ))}
+            </select>
+          )}
 
           {selectedFeat.choice.type === 'skills' && (
             <div className="grid grid-cols-2 gap-1">
